@@ -58,7 +58,8 @@ class SponserController extends Controller
         }
 
         return redirect()
-            ->route('sponsers.show', $sponser);
+            ->route('sponsers.show', $sponser)
+            ->with('notice', '記事を登録しました');
     }
 
     /**
@@ -69,7 +70,8 @@ class SponserController extends Controller
      */
     public function show($id)
     {
-        //
+        $sponser = Sponser::find($id);
+        return view('sponsers.show', compact('sponser'));
     }
 
     /**
