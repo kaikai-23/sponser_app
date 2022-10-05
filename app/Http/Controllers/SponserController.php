@@ -2,7 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Http\Requests\SponserRequest;
+use App\Models\Category;
+use App\Models\Sponser;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class SponserController extends Controller
 {
@@ -23,18 +27,38 @@ class SponserController extends Controller
      */
     public function create()
     {
-        //
+        $categories = Category::all();
+        return view('sponsers.create', compact('categories'));
     }
 
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param   \App\Http\Requests\SponserRequest  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(SponserRequest $request)
     {
-        //
+        $sponser = new Sponser($request->all());
+        $sponser->user_id = $request->user()->id;
+
+        $file = $request->file('image');
+        $sponser->image = date('YmdHis') . '_' . $file->getClientOriginalName();
+
+        DB::beginTransaction();
+        try{
+            $sponser->save();
+            if(!storage::putFileAs('images/sponsers', $file, $sponser->image)){
+                throw new \Exception('画像ファイルの保存に失敗しました。');
+            }
+            DB::commit();
+        }catch(\Exception $e){
+            DB::rollback();
+            return back()->withInput()->withErrors($e->getMessage());
+        }
+
+        return redirect()
+            ->route('sponsers.show', $sponser);
     }
 
     /**
@@ -62,11 +86,11 @@ class SponserController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param   \App\Http\Requests\SponserRequest  $request
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(SponserRequest $request, $id)
     {
         //
     }

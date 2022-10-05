@@ -34,7 +34,7 @@
                     <x-slot name="content">
                         <!-- Authentication -->
                         @auth
-                            <x-dropdown-link :href="route('posts.create')">
+                            <x-dropdown-link :href="route('sponsers.create')">
                                 {{ __('Create Post') }}
                             </x-dropdown-link>
                             <form method="POST" action="{{ route('logout') }}">
@@ -88,7 +88,7 @@
 
                 <div class="mt-3 space-y-1">
                     <!-- Authentication -->
-                    <x-responsive-nav-link :href="route('posts.create')">
+                    <x-responsive-nav-link :href="route('sponsers.create')">
                         {{ __('Create Post') }}
                     </x-responsive-nav-link>
                     <form method="POST" action="{{ route('logout') }}">
