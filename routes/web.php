@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\SponserController;
 
 /*
 |--------------------------------------------------------------------------
@@ -13,12 +14,18 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/', [SponserController::class, 'index'])
+    ->name('root');
 
 Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth'])->name('dashboard');
+
+Route::resource('sponsers', SponserController::class)
+    ->only(['create', 'store', 'edit', 'update', 'destroy'])
+    ->middleware(['auth']);
+
+Route::resource('sponsers', SponserController::class)
+    ->only(['show', 'index']);
 
 require __DIR__.'/auth.php';
