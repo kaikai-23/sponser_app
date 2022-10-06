@@ -17,7 +17,8 @@ class SponserController extends Controller
      */
     public function index()
     {
-        return view('sponsers.index');
+        $sponsers = Sponser::with('user')->latest()->paginate(4);
+        return view('sponsers.index', compact('sponsers'));
     }
 
     /**
