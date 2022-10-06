@@ -28,7 +28,11 @@ class Sponser extends Model
 
     public function getImageUrlAttribute()
     {
-        return Storage::url('images/sponsers/' . $this->image);
+        return Storage::url($this->image_path);
+    }
+    public function getImagePathAttribute()
+    {
+        return 'images/sponsers/' . $this->image; 
     }
 
 }

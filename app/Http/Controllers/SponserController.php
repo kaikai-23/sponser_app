@@ -106,7 +106,7 @@ class SponserController extends Controller
 
         $file = $request->file('image');
         if ($file) {
-            $delete_file_path = 'images/sponsers/' . $sponser->image;
+            $delete_file_path = $sponser->image_path;
             $sponser->image = self::createFileName($file);
         }
         $sponser->fill($request->all());
@@ -127,7 +127,7 @@ class SponserController extends Controller
               // 画像削除
             if (!Storage::delete($delete_file_path)) {
                   //アップロードした画像を削除する
-                Storage::delete('images/sponsers/' . $sponser->image);
+                Storage::delete($sponser->image_path);
                   //例外を投げてロールバックさせる
                 throw new \Exception('画像ファイルの削除に失敗しました。');
                 }
@@ -153,7 +153,29 @@ class SponserController extends Controller
      */
     public function destroy($id)
     {
-        //
+        $sponser = Sponser::find($id);
+
+        // トランザクション開始
+        DB::beginTransaction();
+        try {
+            $sponser->delete();
+
+            // 画像削除
+            if (!Storage::delete($sponser->image_path)) {
+                // 例外を投げてロールバックさせる
+                throw new \Exception('画像ファイルの削除に失敗しました。');
+            }
+
+            // トランザクション終了(成功)
+            DB::commit();
+        } catch (\Exception $e) {
+            // トランザクション終了(失敗)
+            DB::rollback();
+            return back()->withInput()->withErrors($e->getMessage());
+        }
+
+        return redirect()->route('sponsers.index')
+            ->with('notice', '記事を削除しました');
     }
     private static function createFileName($file)
     {
