@@ -43,7 +43,7 @@ class SponserController extends Controller
         $sponser->user_id = $request->user()->id;
 
         $file = $request->file('image');
-        $sponser->image = date('YmdHis') . '_' . $file->getClientOriginalName();
+        $sponser->image = self::createFileName($file);
 
         DB::beginTransaction();
         try{
@@ -82,7 +82,9 @@ class SponserController extends Controller
      */
     public function edit($id)
     {
-        //
+        $sponser = Sponser::find($id);
+        $categories = Category::all();
+        return view('sponsers.edit', compact('sponser','categories'));
     }
 
     /**
@@ -94,7 +96,52 @@ class SponserController extends Controller
      */
     public function update(SponserRequest $request, $id)
     {
-        //
+        $sponser = Sponser::find($id);
+
+        if ($request->user()->cannot('update', $sponser)) {
+            return redirect()->route('sponsers.show', $sponser)
+                ->withErrors('自分の記事以外は更新できません');
+        }
+
+        $file = $request->file('image');
+        if ($file) {
+            $delete_file_path = 'images/sponsers/' . $sponser->image;
+            $sponser->image = self::createFileName($file);
+        }
+        $sponser->fill($request->all());
+
+        // トランザクション開始
+        DB::beginTransaction();
+        try {
+            // 更新
+            $sponser->save();
+
+            if ($file) {
+              // 画像アップロード
+            if (!Storage::putFileAs('images/sponsers', $file, $sponser->image)) {
+                  // 例外を投げてロールバックさせる
+            throw new \Exception('画像ファイルの保存に失敗しました。');
+            }
+
+              // 画像削除
+            if (!Storage::delete($delete_file_path)) {
+                  //アップロードした画像を削除する
+                Storage::delete('images/sponsers/' . $sponser->image);
+                  //例外を投げてロールバックさせる
+                throw new \Exception('画像ファイルの削除に失敗しました。');
+                }
+            }
+
+            // トランザクション終了(成功)
+            DB::commit();
+        } catch (\Exception $e) {
+            // トランザクション終了(失敗)
+            DB::rollback();
+            return back()->withInput()->withErrors($e->getMessage());
+        }
+
+        return redirect()->route('sponsers.show', $sponser)
+            ->with('notice', '記事を更新しました');
     }
 
     /**
@@ -106,5 +153,9 @@ class SponserController extends Controller
     public function destroy($id)
     {
         //
+    }
+    private static function createFileName($file)
+    {
+        return date('YmdHis') . '_' . $file->getClientOriginalName();
     }
 }

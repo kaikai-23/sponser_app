@@ -23,11 +23,19 @@ class SponserRequest extends FormRequest
      */
     public function rules()
     {
-        return [
+        $route = $this->route()->getName();
+
+        $rule = [
             'title' => 'required|string|max:40',
             'body' => 'required|string|max:2000',
-            'image' => 'required|file|image|mimes:jpg,png',
+            //'image' => 'required|file|image|mimes:jpg,png',
             'category_id' => 'required|string|max:10'
         ];
+
+        if($route === 'sponsers.store' ||
+        ($route === 'sponsers.update' && $this->file('image'))){
+            $rule['image'] = 'required|file|image|mimes:jpg,png';
+        }
+        return $rule;
     }
 }
