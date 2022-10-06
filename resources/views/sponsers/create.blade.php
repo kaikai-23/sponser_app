@@ -6,7 +6,6 @@
 
         <form action="{{ route('sponsers.store') }}" method="POST" enctype="multipart/form-data" class="rounded pt-3 pb-8 mb-4">
             @csrf
-            @method('PUT')
             <div class="mb-4">
                 <label class="block text-gray-700 text-sm mb-2" for="title">
                     タイトル
@@ -37,7 +36,7 @@
             </div>
             <div class="mb-4">
                 <label class="block text-gray-700 text-sm mb-2" for="image">
-                    ブログ用画像
+                    画像
                 </label>
                 <input type="file" name="image" class="border-gray-300">
             </div>
